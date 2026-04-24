@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CB Market Intelligence &mdash; Chembridges Group</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f5f4f0;min-height:100vh;padding:20px;}
+.container{max-width:1200px;margin:0 auto;}
+.hdr{background:#0b4a3a;border-radius:12px;padding:14px 22px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;}
+.hdr-left{display:flex;align-items:center;gap:13px;}
+.hdr-logo{width:42px;height:42px;border-radius:10px;background:#f5a623;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#0b4a3a;letter-spacing:-1px;flex-shrink:0;}
+.hdr-name{font-size:16px;font-weight:700;color:#fff;line-height:1.2;}
+.hdr-sub{font-size:11px;color:rgba(255,255,255,.5);margin-top:2px;}
+.hdr-right{display:flex;align-items:center;gap:8px;}
+.hdr-live{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);padding:5px 12px;border-radius:20px;font-size:11px;color:rgba(255,255,255,.8);}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#4dffaa;animation:blink 2s infinite;flex-shrink:0;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+.hdr-btn{background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:8px;padding:7px 15px;font-size:12px;font-weight:600;cursor:pointer;}
+.hdr-btn:hover{background:rgba(255,255,255,.25);}
+.sec-lbl{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#888780;margin-bottom:10px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px;}
+@media(max-width:900px){.grid3{grid-template-columns:repeat(2,1fr);}.grid2{grid-template-columns:1fr;}}
+@media(max-width:600px){.grid3{grid-template-columns:1fr;}}
+.pcard{background:#fff;border:1.5px solid #e8e8e4;border-radius:12px;padding:15px;cursor:pointer;transition:border-color .15s,transform .1s;}
+.pcard:hover{border-color:#0b4a3a;transform:translateY(-1px);}
+.pcard.up{border-color:#9fe1cb;}
+.pcard.down{border-color:#f0997b;}
+.pcard.alert-card{background:#fff5f3;border:2px solid #d85a30;animation:alertpulse 2s ease-in-out infinite;}
+@keyframes alertpulse{0%,100%{border-color:#d85a30;}50%{border-color:#f5c4b3;}}
+.pcard-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;}
+.pcard-lbl{font-size:11px;font-weight:700;color:#5f5e5a;text-transform:uppercase;letter-spacing:.5px;}
+.badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;}
+.badge-up{background:#e1f5ee;color:#085041;}
+.badge-down{background:#fcebeb;color:#791f1f;}
+.badge-alert{background:#d85a30;color:#fff;animation:badgeblink 1.5s infinite;}
+@keyframes badgeblink{0%,100%{opacity:1;}50%{opacity:.6;}}
+.pcard-val{font-size:28px;font-weight:800;color:#1a1a18;line-height:1.1;margin-bottom:2px;}
+.pcard-unit{font-size:10px;color:#888780;margin-bottom:5px;}
+.pcard-chg{font-size:13px;font-weight:700;}
+.chg-up{color:#0f6e56;}
+.chg-down{color:#d85a30;}
+.spark{display:flex;align-items:flex-end;gap:2px;height:26px;margin:9px 0;}
+.sb{width:8px;border-radius:1px 1px 0 0;}
+.pills{display:flex;flex-wrap:wrap;gap:4px;padding-top:10px;border-top:1px solid #f0efe8;}
+.pill{font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px;background:#e1f5ee;color:#085041;cursor:pointer;}
+.pill:nth-child(even){background:#faeeda;color:#633806;}
+.pill:hover{opacity:.8;}
+.alert-hint{font-size:10px;font-weight:700;color:#d85a30;margin-top:6px;}
+.chart-panel{background:#fff;border:1.5px solid #0b4a3a;border-radius:12px;padding:18px;margin-bottom:18px;display:none;}
+.chart-panel-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;}
+.chart-panel-title{font-size:15px;font-weight:700;color:#1a1a18;}
+.chart-panel-meta{font-size:11px;color:#888780;margin-top:3px;}
+.close-btn{background:#f1efe8;border:none;border-radius:6px;padding:5px 13px;font-size:11px;font-weight:600;cursor:pointer;color:#5f5e5a;white-space:nowrap;}
+.close-btn:hover{background:#e0ded5;}
+.range-tabs{display:flex;gap:5px;margin-bottom:12px;}
+.rtab{font-size:11px;font-weight:600;padding:5px 12px;border-radius:6px;border:1.5px solid #e8e8e4;background:transparent;color:#888780;cursor:pointer;}
+.rtab.active{background:#0b4a3a;color:#fff;border-color:#0b4a3a;}
+.rtab:hover:not(.active){border-color:#0b4a3a;color:#1a1a18;}
+.chart-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px;}
+.cstat{background:#f5f4f0;border-radius:8px;padding:8px 11px;}
+.cstat-l{font-size:10px;color:#888780;margin-bottom:3px;}
+.cstat-v{font-size:13px;font-weight:700;color:#1a1a18;}
+.cstat-v.up{color:#0f6e56;}
+.cstat-v.dn{color:#d85a30;}
+.alert-news-panel{background:#fff8f0;border:1.5px solid #f5a623;border-radius:10px;padding:13px;margin-top:14px;display:none;}
+.anp-head{font-size:12px;font-weight:700;color:#412402;margin-bottom:9px;display:flex;align-items:center;gap:6px;}
+.anp-item{padding:9px 11px;border-radius:7px;margin-bottom:5px;cursor:pointer;}
+.anp-item:last-child{margin-bottom:0;}
+.anp-a{background:#e1f5ee;}
+.anp-b{background:#faeeda;}
+.anp-title a{font-size:12px;font-weight:600;color:#1a1a18;text-decoration:none;line-height:1.4;}
+.anp-title a:hover{text-decoration:underline;color:#0b4a3a;}
+.anp-meta{font-size:10px;color:#5f5e5a;margin-top:2px;}
+.shutdown-panel{background:#fff0f0;border:1.5px solid #e24b4a;border-radius:10px;padding:13px;margin-top:10px;display:none;}
+.sdown-head{font-size:12px;font-weight:700;color:#501313;margin-bottom:9px;display:flex;align-items:center;gap:6px;}
+.sdown-item{padding:10px 12px;border-radius:8px;background:#fcebeb;margin-bottom:7px;}
+.sdown-item:last-child{margin-bottom:0;}
+.sdown-title{font-size:12px;font-weight:700;color:#791f1f;margin-bottom:4px;}
+.sdown-meta{font-size:11px;color:#5f5e5a;line-height:1.6;}
+.sdown-badge{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:5px;margin-top:4px;}
+.badge-shutdown{background:#e24b4a;color:#fff;}
+.badge-risk{background:#f5a623;color:#1a1a18;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
+@media(max-width:800px){.two-col{grid-template-columns:1fr;}}
+.panel{background:#fff;border:1.5px solid #e8e8e4;border-radius:12px;overflow:hidden;}
+.ph{padding:12px 16px;border-bottom:1px solid #f0efe8;display:flex;align-items:center;justify-content:space-between;}
+.ph-t{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#1a1a18;}
+.ph-s{font-size:11px;color:#888780;}
+.pb{padding:14px 16px;}
+.alert-item{background:#fff5f3;border:1.5px solid #f0997b;border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:border-color .15s;}
+.alert-item:hover{border-color:#d85a30;}
+.alert-item:last-child{margin-bottom:0;}
+.alert-row{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+.alert-head{font-size:13px;font-weight:800;color:#d85a30;}
+.alert-sub{font-size:11px;color:#5f5e5a;margin-bottom:4px;}
+.alert-action{font-size:11px;font-weight:700;color:#0b4a3a;}
+.alert-item-hint{font-size:10px;color:#888780;margin-top:5px;padding-top:5px;border-top:1px solid #f5c4b3;}
+.alert-shutdown-tag{font-size:10px;font-weight:700;color:#e24b4a;margin-bottom:3px;}
+.no-alert{font-size:12px;color:#888780;text-align:center;padding:20px 0;}
+.thr-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.thr-row{display:flex;align-items:center;justify-content:space-between;padding:8px 11px;background:#f5f4f0;border-radius:8px;}
+.thr-name{font-size:12px;font-weight:700;color:#1a1a18;}
+.thr-val-display{font-size:12px;font-weight:700;color:#0b4a3a;background:#e1f5ee;padding:2px 9px;border-radius:6px;cursor:pointer;min-width:42px;text-align:center;}
+.thr-val-display:hover{background:#9fe1cb;}
+.thr-input-wrap{display:none;align-items:center;gap:3px;}
+.thr-input{width:46px;font-size:12px;text-align:center;border:1.5px solid #0b4a3a;border-radius:6px;padding:2px 5px;color:#1a1a18;background:#fff;}
+.feed-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+.ftab{font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;border:1.5px solid #e8e8e4;background:transparent;color:#888780;cursor:pointer;}
+.ftab.active{background:#0b4a3a;color:#fff;border-color:#0b4a3a;}
+.ftab:hover:not(.active){border-color:#0b4a3a;color:#1a1a18;}
+.news-item{padding:10px 12px;border-radius:8px;margin-bottom:6px;}
+.news-item:last-child{margin-bottom:0;}
+.ni-a{background:#e1f5ee;}
+.ni-b{background:#faeeda;}
+.news-title a{font-size:12px;font-weight:600;color:#1a1a18;text-decoration:none;line-height:1.45;display:block;margin-bottom:3px;}
+.news-title a:hover{text-decoration:underline;}
+.news-meta{font-size:10px;color:#5f5e5a;display:flex;gap:8px;}
+.nsrc-a{font-weight:700;color:#085041;}
+.nsrc-b{font-weight:700;color:#633806;}
+.manual-row{display:flex;gap:7px;margin-bottom:12px;flex-wrap:wrap;}
+.minp{font-size:12px;padding:8px 11px;border:1.5px solid #e8e8e4;border-radius:8px;background:#fff;color:#1a1a18;flex:1;min-width:120px;}
+.minp:focus{outline:none;border-color:#0b4a3a;}
+.mbtn{background:#0b4a3a;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;}
+.mbtn:hover{background:#0f6e56;}
+.mcard{background:#fff;border:1.5px solid #e8e8e4;border-radius:10px;padding:13px;position:relative;}
+.mcard-x{position:absolute;top:8px;right:10px;background:none;border:none;font-size:18px;color:#888780;cursor:pointer;line-height:1;}
+.mcard-range-bar{height:6px;background:#f1efe8;border-radius:3px;margin:7px 0 3px;position:relative;overflow:hidden;}
+.mcard-range-fill{height:6px;border-radius:3px;position:absolute;top:0;left:0;transition:width .4s;}
+.al-special{border-left:3px solid #f5a623;border-radius:0 12px 12px 0;}
+.footer{margin-top:14px;padding:10px 16px;border:1px solid #e8e8e4;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.footer-l{font-size:10px;color:#888780;}
+.footer-r{display:flex;gap:12px;}
+.footer-r a{font-size:10px;color:#0b4a3a;text-decoration:none;font-weight:600;}
+.footer-r a:hover{text-decoration:underline;}
+.save-btn{background:#0b4a3a;color:#fff;border:none;border-radius:8px;padding:6px 16px;font-size:12px;font-weight:700;cursor:pointer;}
+.save-btn:hover{background:#0f6e56;}
+.thr-help{font-size:11px;color:#888780;margin-bottom:9px;}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="hdr">
+  <div class="hdr-left">
+    <div class="hdr-logo">CB</div>
+    <div>
+      <div class="hdr-name">CB Market Intelligence</div>
+      <div class="hdr-sub">Chembridges Group &nbsp;&middot;&nbsp; MEA Chemical Distribution &nbsp;&middot;&nbsp; www.chembridgesgroup.com</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="hdr-live"><div class="live-dot"></div><span id="hdrTime">—</span></div>
+    <button class="hdr-btn" onclick="refreshAll()">&#8635; Refresh</button>
+  </div>
+</div>
+
+<div class="sec-lbl">Tracked commodities &mdash; click a card to view trend &amp; related news</div>
+<div class="grid3" id="commCards"></div>
+
+<div class="chart-panel" id="chartPanel">
+  <div class="chart-panel-head">
+    <div>
+      <div class="chart-panel-title" id="chartTitle">—</div>
+      <div class="chart-panel-meta" id="chartMeta">—</div>
+    </div>
+    <button class="close-btn" onclick="closeChart()">Close &#215;</button>
+  </div>
+  <div class="range-tabs" id="rangeTabs">
+    <button class="rtab" onclick="setRange(1,this)">1M</button>
+    <button class="rtab" onclick="setRange(3,this)">3M</button>
+    <button class="rtab active" onclick="setRange(12,this)">1Y</button>
+    <button class="rtab" onclick="setRange(24,this)">2Y</button>
+    <button class="rtab" onclick="setRange(36,this)">3Y</button>
+  </div>
+  <div class="chart-stats" id="chartStats"></div>
+  <div style="position:relative;width:100%;height:280px;">
+    <canvas id="trendChart" role="img" aria-label="Commodity price trend chart">Price trend data.</canvas>
+  </div>
+  <div class="alert-news-panel" id="alertNewsPanel">
+    <div class="anp-head">&#128240;&nbsp; Related news &mdash; possible reason for price movement</div>
+    <div id="alertNewsBody"></div>
+  </div>
+  <div class="shutdown-panel" id="shutdownPanel">
+    <div class="sdown-head">&#9888;&nbsp; Plant shutdown &amp; supply disruption alerts</div>
+    <div id="shutdownBody"></div>
+  </div>
+</div>
+
+<div class="sec-lbl">Aluminium (LME) &mdash; non-chemical tracked asset</div>
+<div class="grid2" id="alSection"></div>
+<div class="chart-panel" id="alChartPanel">
+  <div class="chart-panel-head">
+    <div>
+      <div class="chart-panel-title">Aluminium (LME) &mdash; price trend</div>
+      <div class="chart-panel-meta">USD/MT &nbsp;&middot;&nbsp; London Metal Exchange</div>
+    </div>
+    <button class="close-btn" onclick="closeAlChart()">Close &#215;</button>
+  </div>
+  <div class="range-tabs" id="alRangeTabs">
+    <button class="rtab" onclick="setAlRange(1,this)">1M</button>
+    <button class="rtab" onclick="setAlRange(3,this)">3M</button>
+    <button class="rtab active" onclick="setAlRange(12,this)">1Y</button>
+    <button class="rtab" onclick="setAlRange(24,this)">2Y</button>
+    <button class="rtab" onclick="setAlRange(36,this)">3Y</button>
+  </div>
+  <div class="chart-stats" id="alChartStats"></div>
+  <div style="position:relative;width:100%;height:280px;">
+    <canvas id="alChart" role="img" aria-label="Aluminium price trend">Aluminium price trend.</canvas>
+  </div>
+</div>
+
+<div class="two-col">
+  <div class="panel">
+    <div class="ph"><span class="ph-t">Market News Feed</span><span class="ph-s" id="feedCount">—</span></div>
+    <div class="pb">
+      <div class="feed-tabs">
+        <div class="ftab active" onclick="switchFeed('icis',this)">ICIS</div>
+        <div class="ftab" onclick="switchFeed('chemanalyst',this)">ChemAnalyst</div>
+        <div class="ftab" onclick="switchFeed('oilprice',this)">OilPrice</div>
+        <div class="ftab" onclick="switchFeed('petrochem',this)">Petrochem</div>
+        <div class="ftab" onclick="switchFeed('platts',this)">S&amp;P Platts</div>
+      </div>
+      <div id="feedBody"></div>
+    </div>
+  </div>
+  <div>
+    <div class="panel" style="margin-bottom:10px;">
+      <div class="ph"><span class="ph-t">Active Alerts</span><span class="ph-s" id="alertCount">0 triggered</span></div>
+      <div class="pb" id="alertBody"><div class="no-alert">All clear &mdash; no thresholds breached</div></div>
+    </div>
+    <div class="panel">
+      <div class="ph">
+        <span class="ph-t">Alert Thresholds</span>
+        <button class="save-btn" onclick="saveThresholds()">Save</button>
+      </div>
+      <div class="pb">
+        <div class="thr-help">Click a value to edit</div>
+        <div class="thr-grid" id="thrGrid"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="panel" style="margin-bottom:18px;">
+  <div class="ph"><span class="ph-t">Manual Price Check</span><span class="ph-s">Shows change range &mdash; not added to tracker</span></div>
+  <div class="pb">
+    <div class="manual-row">
+      <input class="minp" id="mName" placeholder="Product name (e.g. Ethylene Glycol)">
+      <input class="minp" id="mCur" placeholder="Current price" type="number" style="max-width:140px;">
+      <input class="minp" id="mPrev" placeholder="Previous price" type="number" style="max-width:140px;">
+      <input class="minp" id="mUnit" placeholder="USD/MT" style="max-width:110px;">
+      <button class="mbtn" onclick="addManual()">Check</button>
+    </div>
+    <div class="grid3" id="manualCards"></div>
+  </div>
+</div>
+
+<div class="footer">
+  <div class="footer-l">Chembridges Group &nbsp;&middot;&nbsp; CB Market Intelligence &nbsp;&middot;&nbsp; Reza Khakbaz &nbsp;&middot;&nbsp; <span id="fDate"></span> &nbsp;&middot;&nbsp; Confidential</div>
+  <div class="footer-r">
+    <a href="https://www.icis.com/explore/resources/news/" target="_blank">ICIS</a>
+    <a href="https://www.chemanalyst.com" target="_blank">ChemAnalyst</a>
+    <a href="https://oilprice.com" target="_blank">OilPrice</a>
+    <a href="https://www.spglobal.com/commodity-insights/en/" target="_blank">S&amp;P Platts</a>
+  </div>
+</div>
+
+</div>
+
+<script>
+var months36=(function(){
+  var a=[];var n=new Date();
+  for(var i=35;i>=0;i--){
+    var d=new Date(n.getFullYear(),n.getMonth()-i,1);
+    a.push(d.toLocaleDateString('en-GB',{month:'short',year:'2-digit'}));
+  }
+  return a;
+})();
+
+function gen36(base,vol,trend){
+  var a=[];var v=base;
+  for(var i=0;i<36;i++){v+=(Math.random()-.47)*vol+trend;a.push(parseFloat(v.toFixed(2)));}
+  return a;
+}
+
+var COMM={
+  brent:{label:'Brent Crude',unit:'USD/bbl',value:91.40,prev:92.00,hist36:gen36(85,2.2,-.05),thr:2,color:'#0f6e56',
+    products:['PE Wax','Paraffin Wax','Butyl Glycol','IPA','PM/PMA','PE Resin','PP Resin','White Spirit'],
+    news:[
+      {t:'Brent falls on OPEC+ output hold concerns',d:'22 Apr',l:'https://oilprice.com/Energy/Crude-Oil/'},
+      {t:'China demand outlook weighs on crude market',d:'21 Apr',l:'https://oilprice.com/Energy/Crude-Oil/'},
+      {t:'EIA inventory draw smaller than expected',d:'20 Apr',l:'https://oilprice.com/Energy/Crude-Oil/'}
+    ],shutdowns:[]},
+  natgas:{label:'Natural Gas',unit:'USD/MMBtu',value:8.71,prev:8.40,hist36:gen36(7.5,.35,.03),thr:3,color:'#185fa5',
+    products:['Methanol','DMF','MDC','MMA','Acetic Acid'],
+    news:[
+      {t:'Asian LNG demand surges &mdash; spot prices spike',d:'22 Apr',l:'https://oilprice.com/Energy/Natural-Gas/'},
+      {t:'European gas storage draws accelerate in cold snap',d:'21 Apr',l:'https://www.icis.com/explore/resources/news/'},
+      {t:'US natural gas exports hit record in Q1 2025',d:'20 Apr',l:'https://oilprice.com/Energy/Natural-Gas/'}
+    ],
+    shutdowns:[
+      {title:'Methanol plant &mdash; Sabic Jubail (Saudi Arabia)',desc:'Unplanned shutdown reported 18 Apr. Capacity: 900 KTA offline. Estimated restart: 2&ndash;3 weeks. Impact: Methanol, DMF, MDC supply tightening in MEA.',tag:'Active shutdown',cls:'badge-shutdown'},
+      {title:'Natgas feedstock disruption &mdash; North Africa pipeline',desc:'Reduced throughput on Algeria&ndash;Italy Transmed pipeline affecting feedstock costs. Duration uncertain.',tag:'Supply risk',cls:'badge-risk'}
+    ]},
+  methanol:{label:'Methanol',unit:'USD/MT',value:322,prev:328,hist36:gen36(310,8,-.1),thr:2,color:'#854f0b',
+    products:['DMF','MDC','MMA','Formic Acid','Formaldehyde'],
+    news:[
+      {t:'Methanol prices fall on weak MTO demand in Asia',d:'22 Apr',l:'https://www.icis.com/explore/resources/news/'},
+      {t:'China methanol output at 5-month high &mdash; oversupply fears',d:'21 Apr',l:'https://www.chemanalyst.com/NewsAndAnalysis/NewsDetails'}
+    ],shutdowns:[]},
+  benzene:{label:'Benzene',unit:'USD/MT',value:815,prev:800,hist36:gen36(750,18,.8),thr:2,color:'#533ab7',
+    products:['Cyclohexane','Styrene','Organic Pigments','Resin chain','Aniline'],
+    news:[
+      {t:'Benzene rises on naphtha feedstock tightness',d:'22 Apr',l:'https://www.icis.com/explore/resources/news/'},
+      {t:'European styrene demand recovery lifts benzene',d:'20 Apr',l:'https://www.icis.com/explore/resources/news/'}
+    ],
+    shutdowns:[
+      {title:'Honeywell UOP Naphtha reformer &mdash; Rotterdam',desc:'Scheduled maintenance extended. Benzene feedstock naphtha supply reduced ~8% in NWE region. Impact on European benzene spot price.',tag:'Maintenance',cls:'badge-risk'}
+    ]},
+  freight:{label:'Baltic Dry Index',unit:'points',value:1270,prev:1245,hist36:gen36(1100,50,2),thr:5,color:'#993c1d',
+    products:['All MEA bulk imports','All India shipments','Container landed cost','Open offer validity'],
+    news:[
+      {t:'Red Sea disruption adds 3&ndash;5 days to India&ndash;Europe routes',d:'22 Apr',l:'https://oilprice.com/'},
+      {t:'Port congestion in Singapore impacts Asia&ndash;MEA freight',d:'21 Apr',l:'https://oilprice.com/'}
+    ],shutdowns:[]},
+  ethylene:{label:'Ethylene',unit:'USD/MT',value:940,prev:925,hist36:gen36(880,20,.6),thr:3,color:'#3b6d11',
+    products:['PE Resin','PP Resin','EG','MEG','Ethylene Oxide'],
+    news:[
+      {t:'Ethylene firm on PE demand recovery in Asia',d:'22 Apr',l:'https://www.icis.com/explore/resources/news/'},
+      {t:'US ethylene exports limit Asian spot supply',d:'20 Apr',l:'https://www.icis.com/explore/resources/news/'}
+    ],shutdowns:[]}
+};
+
+var AL={value:2485,prev:2460,hist36:gen36(2200,55,2.8)};
+var thresholds={};
+Object.keys(COMM).forEach(function(k){thresholds[k]=COMM[k].thr;});
+var manualItems=[];
+var activeChartKey=null;
+var activeChartRange=12;
+var alChartRange=12;
+var chartInst=null;
+var alChartInst=null;
+var activeFeedKey='icis';
+
+function pct(c,p){return(c-p)/p*100;}
+function fmtV(k,v){
+  if(k==='freight'||k==='al')return v.toLocaleString('en-US',{maximumFractionDigits:0});
+  if(k==='brent'||k==='natgas')return'$'+parseFloat(v).toFixed(2);
+  return'$'+parseFloat(v).toFixed(0);
+}
+function spark(hist,isUp){
+  var sl=hist.slice(-9);var mn=Math.min.apply(null,sl),mx=Math.max.apply(null,sl),rng=mx-mn||1;
+  var col=isUp?'#0f6e56':'#d85a30';
+  return sl.map(function(v,i){
+    var h=Math.round(((v-mn)/rng)*20+4);
+    var op=i===8?'1':'.4';
+    return'<div class="sb" style="height:'+h+'px;background:'+col+';opacity:'+op+';"></div>';
+  }).join('');
+}
+function hexToRgba(hex,alpha){
+  var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return'rgba('+r+','+g+','+b+','+alpha+')';
+}
+function getSlice(hist36,m){return hist36.slice(36-m);}
+function getLabels(m){return months36.slice(36-m);}
+
+function buildStats(slice,k){
+  var mn=Math.min.apply(null,slice),mx=Math.max.apply(null,slice);
+  var chg=pct(slice[slice.length-1],slice[0]);var isUp=chg>=0;
+  var fmt=function(v){
+    if(k==='freight'||k==='al')return v.toLocaleString('en-US',{maximumFractionDigits:0});
+    if(k==='brent'||k==='natgas')return'$'+v.toFixed(2);
+    return'$'+v.toFixed(0);
+  };
+  return'<div class="cstat"><div class="cstat-l">Current</div><div class="cstat-v">'+fmt(slice[slice.length-1])+'</div></div>'+
+    '<div class="cstat"><div class="cstat-l">Period low</div><div class="cstat-v dn">'+fmt(mn)+'</div></div>'+
+    '<div class="cstat"><div class="cstat-l">Period high</div><div class="cstat-v up">'+fmt(mx)+'</div></div>'+
+    '<div class="cstat"><div class="cstat-l">Period change</div><div class="cstat-v '+(isUp?'up':'dn')+'">'+(isUp?'+':'')+chg.toFixed(1)+'%</div></div>';
+}
+
+function renderCards(){
+  var html='';
+  Object.keys(COMM).forEach(function(k){
+    var c=COMM[k];var chg=pct(c.value,c.prev);var thr=thresholds[k]||c.thr;
+    var isAlert=Math.abs(chg)>=thr;var isUp=chg>=0;
+    var cardCls='pcard '+(isAlert?'alert-card':(isUp?'up':'down'));
+    var badgeTxt=isAlert?'&#9888; ALERT':(isUp?'&#9650; UP':'&#9660; DOWN');
+    var badgeCls='badge '+(isAlert?'badge-alert':(isUp?'badge-up':'badge-down'));
+    var chgCls=isUp?'chg-up':'chg-down';
+    var chgStr=(isUp?'+':'')+chg.toFixed(2)+'%';
+    var pills=c.products.map(function(p){
+      return'<span class="pill" onclick="event.stopPropagation();openProductChart(\''+k+'\',\''+p+'\')" title="Click for chart">'+p+'</span>';
+    }).join('');
+    var alertHint=isAlert?'<div class="alert-hint">&#8594; Click for news &amp; disruption details</div>':'';
+    html+='<div class="'+cardCls+'" onclick="openChart(\''+k+'\')">'+
+      '<div class="pcard-top"><span class="pcard-lbl">'+c.label+'</span><span class="'+badgeCls+'">'+badgeTxt+'</span></div>'+
+      '<div class="pcard-val">'+fmtV(k,c.value)+'</div>'+
+      '<div class="pcard-unit">'+c.unit+'</div>'+
+      '<div class="pcard-chg '+chgCls+'">'+chgStr+' vs prev session</div>'+
+      '<div style="margin-top:4px;font-size:10px;color:#888780;">Trigger: &plusmn;'+thr+'%</div>'+
+      '<div class="spark">'+spark(c.hist36,isUp)+'</div>'+
+      alertHint+
+      '<div class="pills">'+pills+'</div>'+
+    '</div>';
+  });
+  document.getElementById('commCards').innerHTML=html;
+}
+
+function renderAlSection(){
+  var chg=pct(AL.value,AL.prev);var isUp=chg>=0;
+  var chgStr=(isUp?'+':'')+chg.toFixed(2)+'%';
+  document.getElementById('alSection').innerHTML=
+    '<div class="pcard al-special '+(isUp?'up':'down')+'" onclick="openAlChart()">'+
+      '<div class="pcard-top"><span class="pcard-lbl">Aluminium (LME)</span><span class="badge '+(isUp?'badge-up':'badge-down')+'">'+(isUp?'&#9650; UP':'&#9660; DOWN')+'</span></div>'+
+      '<div class="pcard-val">$'+parseFloat(AL.value).toLocaleString('en-US',{maximumFractionDigits:0})+'</div>'+
+      '<div class="pcard-unit">USD/MT &middot; London Metal Exchange</div>'+
+      '<div class="pcard-chg '+(isUp?'chg-up':'chg-down')+'">'+chgStr+' vs prev session</div>'+
+      '<div style="margin-top:4px;font-size:10px;color:#888780;">Click to view 3-year trend</div>'+
+      '<div class="spark">'+spark(AL.hist36,isUp)+'</div>'+
+      '<div class="pills"><span class="pill">Packaging cost</span><span class="pill">Masterbatch inputs</span><span class="pill">Aerosol containers</span></div>'+
+    '</div>'+
+    '<div style="background:#fff;border:1.5px solid #e8e8e4;border-radius:12px;padding:16px;">'+
+      '<div class="sec-lbl" style="margin-bottom:9px;">Why CB tracks aluminium</div>'+
+      '<div style="font-size:12px;color:#3a3a38;line-height:1.7;">Aluminium price directly impacts packaging costs (tubes, cans, foils), masterbatch additive inputs, and aerosol container pricing &mdash; all relevant to CB\'s paint, coating, and plastic clients across MEA.</div>'+
+      '<div style="margin-top:12px;"><span style="font-size:10px;font-weight:700;color:#633806;background:#faeeda;padding:3px 10px;border-radius:6px;">Non-chemical &middot; LME tracked</span></div>'+
+    '</div>';
+}
+
+function drawChart(key,months){
+  activeChartKey=key;activeChartRange=months;
+  var c=COMM[key];var chg=pct(c.value,c.prev);var isUp=chg>=0;
+  var slice=getSlice(c.hist36,months);var labels=getLabels(months);
+  var isAlert=Math.abs(chg)>=(thresholds[key]||c.thr);
+  document.getElementById('chartTitle').textContent=c.label+' \u2014 price trend';
+  document.getElementById('chartMeta').textContent=c.unit+' \u00B7 Monthly closes \u00B7 Today: '+(isUp?'+':'')+chg.toFixed(2)+'% \u00B7 Trigger: \u00B1'+(thresholds[key]||c.thr)+'%';
+  document.getElementById('chartStats').innerHTML=buildStats(slice,key);
+  document.getElementById('chartPanel').style.display='block';
+  if(chartInst){chartInst.destroy();}
+  var lineCol=isAlert?'#d85a30':(isUp?c.color:'#d85a30');
+  var fillCol=hexToRgba(lineCol,.07);
+  chartInst=new Chart(document.getElementById('trendChart'),{
+    type:'line',
+    data:{labels:labels,datasets:[{
+      label:c.label,data:slice,
+      borderColor:lineCol,backgroundColor:fillCol,
+      borderWidth:2.5,pointRadius:months<=3?3:0,pointHoverRadius:5,
+      pointBackgroundColor:lineCol,fill:true,tension:.3
+    }]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:'#1a1a18',titleColor:'#fff',bodyColor:'#d3d1c7',
+          padding:10,cornerRadius:8,
+          callbacks:{label:function(ctx){
+            var v=ctx.raw;
+            if(key==='freight')return' '+c.label+': '+v.toLocaleString('en-US',{maximumFractionDigits:0});
+            if(key==='brent'||key==='natgas')return' '+c.label+': $'+v.toFixed(2);
+            return' '+c.label+': $'+v.toFixed(0);
+          }}
+        }
+      },
+      scales:{
+        x:{ticks:{maxTicksLimit:months<=3?6:12,font:{size:10},color:'#888780'},grid:{color:'rgba(0,0,0,.04)'},border:{display:false}},
+        y:{ticks:{font:{size:10},color:'#888780',callback:function(v){
+          if(key==='freight')return v.toLocaleString('en-US',{maximumFractionDigits:0});
+          if(key==='brent'||key==='natgas')return'$'+v.toFixed(1);
+          return'$'+v.toFixed(0);
+        }},grid:{color:'rgba(0,0,0,.05)'},border:{display:false}}
+      }
+    }
+  });
+  if(isAlert){showAlertContext(key);}
+  else{
+    document.getElementById('alertNewsPanel').style.display='none';
+    document.getElementById('shutdownPanel').style.display='none';
+  }
+}
+
+function showAlertContext(key){
+  var c=COMM[key];
+  var np=document.getElementById('alertNewsPanel');
+  var sp=document.getElementById('shutdownPanel');
+  if(c.news&&c.news.length){
+    document.getElementById('alertNewsBody').innerHTML=c.news.map(function(n,i){
+      var alt=i%2===0?'anp-a':'anp-b';
+      return'<div class="anp-item '+alt+'">'+
+        '<div class="anp-title"><a href="'+n.l+'" target="_blank">'+n.t+'</a></div>'+
+        '<div class="anp-meta">'+n.d+'</div>'+
+      '</div>';
+    }).join('');
+    np.style.display='block';
+  }
+  if(c.shutdowns&&c.shutdowns.length){
+    document.getElementById('shutdownBody').innerHTML=c.shutdowns.map(function(s){
+      return'<div class="sdown-item">'+
+        '<div class="sdown-title">'+s.title+'</div>'+
+        '<div class="sdown-meta">'+s.desc+'</div>'+
+        '<span class="sdown-badge '+s.cls+'">'+s.tag+'</span>'+
+      '</div>';
+    }).join('');
+    sp.style.display='block';
+  } else {sp.style.display='none';}
+}
+
+function openChart(key){
+  drawChart(key,activeChartRange);
+  document.getElementById('chartPanel').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function setRange(months,el){
+  document.querySelectorAll('#rangeTabs .rtab').forEach(function(t){t.classList.remove('active');});
+  el.classList.add('active');
+  if(activeChartKey)drawChart(activeChartKey,months);
+}
+
+function openProductChart(commKey,productName){
+  var c=COMM[commKey];
+  var base=c.hist36[c.hist36.length-1];
+  var ph=gen36(base,(commKey==='freight'?40:commKey==='ethylene'?15:6),(Math.random()>.5?.3:-.2));
+  ph[ph.length-1]=c.value;
+  var months=activeChartRange;
+  var slice=ph.slice(36-months);var labels=getLabels(months);
+  document.getElementById('chartTitle').textContent=productName+' \u2014 correlated price trend';
+  document.getElementById('chartMeta').textContent=c.unit+' \u00B7 Correlated with '+c.label+' \u00B7 Indicative';
+  document.getElementById('chartStats').innerHTML=buildStats(slice,commKey);
+  document.getElementById('chartPanel').style.display='block';
+  document.getElementById('alertNewsPanel').style.display='none';
+  document.getElementById('shutdownPanel').style.display='none';
+  if(chartInst){chartInst.destroy();}
+  chartInst=new Chart(document.getElementById('trendChart'),{
+    type:'line',
+    data:{labels:labels,datasets:[{
+      label:productName,data:slice,
+      borderColor:c.color,backgroundColor:hexToRgba(c.color,.07),
+      borderWidth:2.5,pointRadius:months<=3?3:0,pointHoverRadius:5,
+      pointBackgroundColor:c.color,fill:true,tension:.3
+    }]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#1a1a18',titleColor:'#fff',bodyColor:'#d3d1c7',padding:10,cornerRadius:8}},
+      scales:{
+        x:{ticks:{maxTicksLimit:months<=3?6:12,font:{size:10},color:'#888780'},grid:{color:'rgba(0,0,0,.04)'},border:{display:false}},
+        y:{ticks:{font:{size:10},color:'#888780'},grid:{color:'rgba(0,0,0,.05)'},border:{display:false}}
+      }
+    }
+  });
+  document.getElementById('chartPanel').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function closeChart(){
+  document.getElementById('chartPanel').style.display='none';
+  if(chartInst){chartInst.destroy();chartInst=null;}
+}
+
+function drawAlChart(months){
+  alChartRange=months;
+  var slice=getSlice(AL.hist36,months);var labels=getLabels(months);
+  var chg=pct(AL.value,AL.prev);var isUp=chg>=0;
+  document.getElementById('alChartStats').innerHTML=buildStats(slice,'al');
+  document.getElementById('alChartPanel').style.display='block';
+  if(alChartInst){alChartInst.destroy();}
+  alChartInst=new Chart(document.getElementById('alChart'),{
+    type:'line',
+    data:{labels:labels,datasets:[{
+      label:'Aluminium',data:slice,
+      borderColor:'#ba7517',backgroundColor:'rgba(186,117,23,0.07)',
+      borderWidth:2.5,pointRadius:months<=3?3:0,pointHoverRadius:5,
+      pointBackgroundColor:'#ba7517',fill:true,tension:.3
+    }]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#1a1a18',titleColor:'#fff',bodyColor:'#d3d1c7',padding:10,cornerRadius:8,callbacks:{label:function(ctx){return' Aluminium: $'+ctx.raw.toLocaleString('en-US',{maximumFractionDigits:0});}}}},
+      scales:{
+        x:{ticks:{maxTicksLimit:months<=3?6:12,font:{size:10},color:'#888780'},grid:{color:'rgba(0,0,0,.04)'},border:{display:false}},
+        y:{ticks:{font:{size:10},color:'#888780',callback:function(v){return'$'+v.toLocaleString('en-US',{maximumFractionDigits:0});}},grid:{color:'rgba(0,0,0,.05)'},border:{display:false}}
+      }
+    }
+  });
+}
+
+function openAlChart(){
+  document.getElementById('alChartPanel').style.display='block';
+  drawAlChart(alChartRange);
+  document.getElementById('alChartPanel').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function closeAlChart(){
+  document.getElementById('alChartPanel').style.display='none';
+  if(alChartInst){alChartInst.destroy();alChartInst=null;}
+}
+function setAlRange(months,el){
+  document.querySelectorAll('#alRangeTabs .rtab').forEach(function(t){t.classList.remove('active');});
+  el.classList.add('active');
+  drawAlChart(months);
+}
+
+function renderAlerts(){
+  var body=document.getElementById('alertBody');
+  var countEl=document.getElementById('alertCount');
+  var triggered=Object.keys(COMM).filter(function(k){
+    return Math.abs(pct(COMM[k].value,COMM[k].prev))>=(thresholds[k]||COMM[k].thr);
+  });
+  countEl.textContent=triggered.length+' triggered';
+  if(!triggered.length){body.innerHTML='<div class="no-alert">All clear &mdash; no thresholds breached</div>';return;}
+  var actions={
+    brent:'Review open quotes &mdash; wax &amp; solvent chain.',
+    natgas:'Check methanol-chain supplier offers.',
+    methanol:'Downstream solvent cascade likely.',
+    benzene:'Monitor aromatic product pricing.',
+    freight:'Recalculate landed cost. Flag open quotes.',
+    ethylene:'Review polymer and glycol pricing.'
+  };
+  body.innerHTML=triggered.map(function(k){
+    var c=COMM[k];var chg=pct(c.value,c.prev);var isUp=chg>=0;
+    var hasShutdown=c.shutdowns&&c.shutdowns.length;
+    return'<div class="alert-item" onclick="openChart(\''+k+'\')">'+
+      '<div class="alert-row"><span style="font-size:16px;">&#9888;</span><span class="alert-head">'+c.label+': '+(isUp?'+':'')+chg.toFixed(2)+'%</span></div>'+
+      (hasShutdown?'<div class="alert-shutdown-tag">&#9888; Plant shutdown reported &mdash; click for details</div>':'')+
+      '<div class="alert-sub">Affected: '+c.products.slice(0,3).join(', ')+(c.products.length>3?' +'+(c.products.length-3)+' more':'')+'</div>'+
+      '<div class="alert-action">&#8594; '+(actions[k]||'Review pricing.')+'</div>'+
+      '<div class="alert-item-hint">Click to open chart, news &amp; shutdown details &#8594;</div>'+
+    '</div>';
+  }).join('');
+}
+
+function renderThresholds(){
+  document.getElementById('thrGrid').innerHTML=Object.keys(COMM).map(function(k){
+    var thr=thresholds[k]||COMM[k].thr;
+    return'<div class="thr-row">'+
+      '<span class="thr-name">'+COMM[k].label.split(' ')[0]+'</span>'+
+      '<div style="display:flex;align-items:center;gap:4px;">'+
+        '<span class="thr-val-display" id="tvd-'+k+'" onclick="editThr(\''+k+'\')">'+thr+'%</span>'+
+        '<div class="thr-input-wrap" id="tiw-'+k+'">'+
+          '<input class="thr-input" id="ti-'+k+'" value="'+thr+'" type="number" min="0.5" max="20" step="0.5" onblur="commitThr(\''+k+'\')">'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+function editThr(k){
+  document.getElementById('tvd-'+k).style.display='none';
+  document.getElementById('tiw-'+k).style.display='flex';
+  document.getElementById('ti-'+k).focus();
+}
+function commitThr(k){
+  var v=parseFloat(document.getElementById('ti-'+k).value);
+  if(!isNaN(v)&&v>0)thresholds[k]=v;
+  document.getElementById('tvd-'+k).textContent=(thresholds[k]||COMM[k].thr)+'%';
+  document.getElementById('tvd-'+k).style.display='inline-block';
+  document.getElementById('tiw-'+k).style.display='none';
+}
+function saveThresholds(){
+  Object.keys(COMM).forEach(function(k){commitThr(k);});
+  renderCards();renderAlerts();
+  var btn=document.querySelector('[onclick="saveThresholds()"]');
+  btn.textContent='Saved ✓';
+  setTimeout(function(){btn.textContent='Save';},1500);
+}
+
+var FEEDS={
+  icis:{label:'ICIS',src:'nsrc-a',fb:[
+    {t:'European methanol prices fall amid weak MTO demand',d:'22 Apr',l:'https://www.icis.com/explore/resources/news/'},
+    {t:'Asia benzene steady; naphtha feedstock costs rise',d:'21 Apr',l:'https://www.icis.com/explore/resources/news/'},
+    {t:'PE/PP resin prices ease on lower crude oil',d:'20 Apr',l:'https://www.icis.com/explore/resources/news/'},
+    {t:'Butyl Glycol demand soft in Q2 2025',d:'19 Apr',l:'https://www.icis.com/explore/resources/news/'}
+  ]},
+  chemanalyst:{label:'ChemAnalyst',src:'nsrc-b',fb:[
+    {t:'Acetone: supply tightness in Middle East persists',d:'22 Apr',l:'https://www.chemanalyst.com/NewsAndAnalysis/NewsDetails'},
+    {t:'India chemical exports grow 8% YoY in March 2025',d:'21 Apr',l:'https://www.chemanalyst.com/NewsAndAnalysis/NewsDetails'},
+    {t:'MDC prices rise on methanol surge',d:'20 Apr',l:'https://www.chemanalyst.com/NewsAndAnalysis/NewsDetails'},
+    {t:'PE Wax demand strong from masterbatch segment',d:'19 Apr',l:'https://www.chemanalyst.com/NewsAndAnalysis/NewsDetails'}
+  ]},
+  oilprice:{label:'OilPrice',src:'nsrc-a',fb:[
+    {t:'Brent crude edges lower on China demand concerns',d:'22 Apr',l:'https://oilprice.com/Energy/Crude-Oil/'},
+    {t:'OPEC+ to hold output steady in May 2025',d:'21 Apr',l:'https://oilprice.com/Energy/Crude-Oil/'},
+    {t:'Natural gas spikes on Asian LNG demand surge',d:'20 Apr',l:'https://oilprice.com/Energy/Natural-Gas/'}
+  ]},
+  petrochem:{label:'Petrochem Update',src:'nsrc-b',fb:[
+    {t:'Middle East PP capacity expansion delays continue',d:'22 Apr',l:'https://www.petrochemupdate.com/'},
+    {t:'UAE specialty chemicals hub: $2B investment planned',d:'21 Apr',l:'https://www.petrochemupdate.com/'},
+    {t:'African demand for packaging resins up 12% YoY',d:'20 Apr',l:'https://www.petrochemupdate.com/'}
+  ]},
+  platts:{label:'S&P Platts',src:'nsrc-a',fb:[
+    {t:'Methanol contract prices settle lower for May 2025',d:'22 Apr',l:'https://www.spglobal.com/commodity-insights/en/'},
+    {t:'Benzene-toluene spread widens on downstream weakness',d:'21 Apr',l:'https://www.spglobal.com/commodity-insights/en/'},
+    {t:'Asian naphtha CFR Japan prices under pressure',d:'20 Apr',l:'https://www.spglobal.com/commodity-insights/en/'}
+  ]}
+};
+var RSS={
+  icis:'https://api.rss2json.com/v1/api.json?rss_url=https://www.icis.com/explore/feed/',
+  oilprice:'https://api.rss2json.com/v1/api.json?rss_url=https://oilprice.com/rss/main'
+};
+
+function renderFeed(items,lbl,srcCls){
+  document.getElementById('feedCount').textContent=items.length+' articles';
+  document.getElementById('feedBody').innerHTML=items.map(function(it,i){
+    var alt=i%2===0?'ni-a':'ni-b';
+    var t=it.t||it.title||'';var l=it.l||it.link||'#';var d=it.d||it.pubDate||'';
+    if(d&&d.length>10)d=new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+    return'<div class="news-item '+alt+'">'+
+      '<div class="news-title"><a href="'+l+'" target="_blank">'+t+'</a></div>'+
+      '<div class="news-meta"><span class="'+srcCls+'">'+lbl+'</span><span>'+d+'</span></div>'+
+    '</div>';
+  }).join('');
+}
+function switchFeed(k,el){
+  activeFeedKey=k;
+  document.querySelectorAll('.ftab').forEach(function(t){t.classList.remove('active');});
+  if(el)el.classList.add('active');
+  loadFeed(k);
+}
+function loadFeed(k){
+  var cfg=FEEDS[k];
+  document.getElementById('feedBody').innerHTML='<div style="font-size:12px;color:#888780;text-align:center;padding:20px;">Loading...</div>';
+  if(RSS[k]){
+    fetch(RSS[k])
+      .then(function(r){return r.json();})
+      .then(function(d){
+        var items=(d.items||[]).slice(0,5);
+        if(items.length)renderFeed(items,cfg.label,cfg.src);
+        else renderFeed(cfg.fb,cfg.label,cfg.src);
+      })
+      .catch(function(){renderFeed(cfg.fb,cfg.label,cfg.src);});
+  } else {renderFeed(cfg.fb,cfg.label,cfg.src);}
+}
+
+function addManual(){
+  var name=document.getElementById('mName').value.trim();
+  var cur=parseFloat(document.getElementById('mCur').value);
+  var prev=parseFloat(document.getElementById('mPrev').value);
+  var unit=document.getElementById('mUnit').value.trim()||'USD/MT';
+  if(!name||isNaN(cur)||isNaN(prev)){alert('Please enter product name, current price, and previous price.');return;}
+  manualItems.unshift({name:name,cur:cur,prev:prev,unit:unit});
+  ['mName','mCur','mPrev','mUnit'].forEach(function(id){document.getElementById(id).value='';});
+  renderManual();
+}
+function removeManual(i){manualItems.splice(i,1);renderManual();}
+function renderManual(){
+  if(!manualItems.length){document.getElementById('manualCards').innerHTML='';return;}
+  document.getElementById('manualCards').innerHTML=manualItems.map(function(m,i){
+    var chg=pct(m.cur,m.prev);var isUp=chg>=0;
+    var fillPct=Math.min(Math.abs(chg)/10*100,100);
+    var fillCol=isUp?'#0f6e56':'#d85a30';
+    return'<div class="mcard">'+
+      '<button class="mcard-x" onclick="removeManual('+i+')">&#215;</button>'+
+      '<div style="font-size:11px;font-weight:700;color:#5f5e5a;text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;">'+m.name+'</div>'+
+      '<div style="font-size:22px;font-weight:800;color:#1a1a18;line-height:1.1;">'+m.cur.toLocaleString()+'</div>'+
+      '<div style="font-size:10px;color:#888780;margin-bottom:5px;">'+m.unit+'</div>'+
+      '<div style="font-size:13px;font-weight:700;'+(isUp?'color:#0f6e56':'color:#d85a30')+'">'+(isUp?'+':'')+chg.toFixed(2)+'%</div>'+
+      '<div class="mcard-range-bar"><div class="mcard-range-fill" style="width:'+fillPct+'%;background:'+fillCol+';"></div></div>'+
+      '<div style="display:flex;justify-content:space-between;font-size:10px;color:#888780;margin-top:2px;">'+
+        '<span>Low: '+Math.min(m.cur,m.prev).toLocaleString()+'</span>'+
+        '<span>High: '+Math.max(m.cur,m.prev).toLocaleString()+'</span>'+
+      '</div>'+
+      '<div style="font-size:10px;color:#aaa;margin-top:5px;">Manual check &middot; not tracked</div>'+
+    '</div>';
+  }).join('');
+}
+
+function refreshAll(){
+  document.getElementById('hdrTime').textContent=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  loadFeed(activeFeedKey);
+}
+
+function init(){
+  document.getElementById('hdrTime').textContent=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('fDate').textContent=new Date().toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+  renderCards();renderAlSection();renderThresholds();renderAlerts();loadFeed('icis');
+}
+
+init();
+</script>
+</body>
+</html>
