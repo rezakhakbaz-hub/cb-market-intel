@@ -1,0 +1,24 @@
+{
+  "name": "CB Market Intelligence",
+  "short_name": "CB Market",
+  "description": "Chembridges Group MEA commodity market dashboard.",
+  "start_url": "/cb-market-intel/",
+  "scope": "/cb-market-intel/",
+  "display": "standalone",
+  "background_color": "#0b4a3a",
+  "theme_color": "#0b4a3a",
+  "icons": [
+    {
+      "src": "/cb-market-intel/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/cb-market-intel/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

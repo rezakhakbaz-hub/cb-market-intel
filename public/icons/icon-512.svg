@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="CB Market">
+  <rect width="512" height="512" rx="112" fill="#0b4a3a"/>
+  <path d="M108 326V186h82c40 0 65 22 65 56 0 14-5 26-14 36 23 8 36 27 36 53 0 40-28 66-74 66h-95Zm56-86h25c12 0 20-7 20-18s-8-18-21-18h-24v36Zm0 105h35c15 0 24-8 24-22 0-13-9-21-25-21h-34v43Z" fill="#f5f4f0"/>
+  <path d="M296 394V120h51v226h75v48H296Z" fill="#f5a623"/>
+  <path d="M102 132h143" stroke="#f5a623" stroke-width="22" stroke-linecap="round"/>
+</svg>
